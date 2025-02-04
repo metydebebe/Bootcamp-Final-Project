@@ -1,10 +1,11 @@
-DATABASE QUERIES:
+POSTGRESQL DATABASE QUERIES:
 
 1- Users Table
 This table will store user information.
 Stores user information (name, email, phone).
 
 SQL
+
 CREATE TABLE users (
 user_id SERIAL PRIMARY KEY,
 full_name VARCHAR(100) NOT NULL,
@@ -18,6 +19,7 @@ This table will store information about pets available for adoption.
 Stores pet information (name, age, breed, description, adoption status).
 
 SQL
+
 CREATE TABLE pets (
 pet_id SERIAL PRIMARY KEY,
 name VARCHAR(100) NOT NULL,
