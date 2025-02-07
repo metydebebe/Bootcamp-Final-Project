@@ -48,7 +48,7 @@ app.get("/pets/:id", async (req, res) => {
   }
 });
 
-// POST a new pet
+
 // POST a new pet
 app.post("/pets", async (req, res) => {
   const { name, age, pet_type, description } = req.body;
@@ -76,7 +76,7 @@ app.post("/pets", async (req, res) => {
         [name, age, pet_type, description]
     );
 
-    // Respond with the created pet and a 201 status
+    // Respond with the created pet and a 200 status
     res.status(200).json({ message: 'Pet created successfully', pet: result.rows[0] });
 
   } catch (error) {
