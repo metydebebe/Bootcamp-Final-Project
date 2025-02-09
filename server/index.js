@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 
-// CRUD Operations
+// CRUD Operations for Pets
 
 // GET all pets
 app.get("/pets", async (req, res) => {
@@ -126,7 +126,7 @@ app.delete("/pets/:id", async (req, res) => {
 });
 
 
-// Applications
+// CRUD Operations for Applications
 
 // GET all applications
 app.get("/applications", async (req, res) => {
@@ -272,6 +272,103 @@ app.get("/applications", async (req, res) => {
     }
   });
   
+
+// CRUD Operations for Pets
+
+// Events
+
+// GET all events
+app.get("/events", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM events");
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'No events found' });
+        }
+
+        res.status(200).json({ message: 'Events retrieved successfully', response: result.rows });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+// GET a specific event by ID
+app.get("/events/:id", async (req, res) => {
+    const eventId = req.params.id;
+
+    try {
+        const result = await pool.query("SELECT * FROM events WHERE event_id = $1", [eventId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        res.status(200).json({ message: 'Event retrieved successfully', response: result.rows[0] });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+// POST a new event
+app.post("/events", async (req, res) => {
+    const { event_name, event_date, location, description } = req.body;
+
+    // Check if any required fields are missing
+    if (!event_name || !event_date || !location) {
+        return res.status(400).json({ message: 'Missing required fields: event_name, event_date, and location are required.' });
+    }
+
+    try {
+        // Check if an event with the specified name and date already exists
+        const existingEvent = await pool.query(
+            "SELECT * FROM events WHERE event_name = $1 AND event_date = $2",
+            [event_name, event_date]
+        );
+
+        // If event exists, respond with 404 status
+        if (existingEvent.rows.length > 0) {
+            return res.status(404).json({ message: 'Event already exists' });
+        }
+
+        // Insert the new event into the database
+        const result = await pool.query(
+            `INSERT INTO events (event_name, event_date, location, description)
+             VALUES ($1, $2, $3, $4) RETURNING *`,
+            [event_name, event_date, location, description]
+        );
+
+        // Respond with the created event and a 200 status
+        res.status(200).json({ message: 'Event created successfully', response: result.rows[0] });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+// DELETE an event by ID
+app.delete("/events/:id", async (req, res) => {
+    const eventId = req.params.id;
+
+    try {
+        const result = await pool.query("DELETE FROM events WHERE event_id = $1 RETURNING *", [eventId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        res.status(200).json({ message: 'Event deleted successfully', response: result.rows[0] });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // Start the server
 const PORT = 3000;
 app.listen(PORT, () => {
