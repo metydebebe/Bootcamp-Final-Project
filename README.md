@@ -38,3 +38,17 @@ application_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 status VARCHAR(20) DEFAULT 'Pending',
 FOREIGN KEY (pet_id) REFERENCES pets (pet_id) ON DELETE CASCADE
 );
+
+3- Events Table
+This allows us to store data related to various events
+
+SQL
+
+CREATE TABLE events (
+event_id SERIAL PRIMARY KEY,
+event_name VARCHAR(100) NOT NULL,
+event_date TIMESTAMP NOT NULL,
+location VARCHAR(100),
+description TEXT,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
