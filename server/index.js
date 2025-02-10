@@ -4,50 +4,47 @@ const pool = require("./db");
 
 const app = express();
 
-
 // Middleware
 app.use(cors());
 app.use(express.json());
-
 
 // CRUD Operations for Pets
 
 // GET all pets
 app.get("/pets", async (req, res) => {
-  try {
-      const result = await pool.query("SELECT * FROM pets");
-
-      if (result.rows.length === 0) {
-          return res.status(404).json({ message: 'No pets found' });
-      }
-
-      res.json(result.rows);
-
-  } catch (error) {
-      console.error(error.message);
-      res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
-
-// GET a specific pet by ID
-app.get("/pets/:id", async (req, res) => {
-  const petId = req.params.id;
-
-  try {
-      const result = await pool.query("SELECT * FROM pets WHERE pet_id = $1", [petId]);
-
-      if (result.rows.length === 0) {
-          return res.status(404).json({ message: 'Pet not found' });
-      }
-
-      res.json(result.rows[0]);
-      
-  } catch (error) {
-      console.error(error.message);
-      res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
-
+    try {
+        const result = await pool.query("SELECT * FROM pets");
+  
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'No pets found' });
+        }
+  
+        return res.status(200).json(result.rows); 
+  
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  });
+  
+  // GET a specific pet by ID
+  app.get("/pets/:id", async (req, res) => {
+    const petId = req.params.id;
+  
+    try {
+        const result = await pool.query("SELECT * FROM pets WHERE pet_id = $1", [petId]);
+  
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Pet not found' });
+        }
+  
+        return res.status(200).json(result.rows[0]);
+        
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  });
 
 // POST a new pet
 app.post("/pets", async (req, res) => {
@@ -59,7 +56,6 @@ app.post("/pets", async (req, res) => {
   }
 
   try {
-  
     // Check if a pet with the same name, age, pet_type, and description already exists
     const existingPet = await pool.query(
         "SELECT * FROM pets WHERE name = $1 AND age = $2 AND pet_type = $3 AND description = $4",
@@ -67,7 +63,7 @@ app.post("/pets", async (req, res) => {
     );
 
     if (existingPet.rows.length > 0) {
-        return res.status(404).json({ message: 'A pet with the same details already exists.' });
+        return res.status(409).json({ message: 'A pet with the same details already exists.' });
     }
 
     // Insert the new pet into the database
@@ -76,8 +72,8 @@ app.post("/pets", async (req, res) => {
         [name, age, pet_type, description]
     );
 
-    // Respond with the created pet and a 200 status
-    res.status(200).json({ message: 'Pet created successfully', pet: result.rows[0] });
+    // Respond with the created pet and a 201 status
+    res.status(201).json({ message: 'Pet created successfully', pet: result.rows[0] });
 
   } catch (error) {
       console.error(error.message);
@@ -100,7 +96,7 @@ app.put("/pets/:id", async (req, res) => {
           return res.status(404).json({ message: 'Pet not found' });
       }
 
-      res.json({ message: 'Pet updated successfully', pet: result.rows[0] });
+      res.status(200).json({ message: 'Pet updated successfully', pet: result.rows[0] });
   } catch (error) {
       console.error(error.message);
       res.status(500).json({ message: 'Internal Server Error' });
@@ -118,13 +114,12 @@ app.delete("/pets/:id", async (req, res) => {
           return res.status(404).json({ message: 'Pet not found' });
       }
 
-      res.json({ message: 'Pet deleted successfully', pet: result.rows[0] });
+      res.status(204).json(); // No content to return
   } catch (error) {
       console.error(error.message);
       res.status(500).json({ message: 'Internal Server Error' });
   }
 });
-
 
 // CRUD Operations for Applications
 
@@ -143,10 +138,10 @@ app.get("/applications", async (req, res) => {
         console.error(error.message);
         res.status(500).json({ message: 'Internal Server Error' });
     }
-  });
+});
   
-  // GET a specific application by ID
-  app.get("/applications/:id", async (req, res) => {
+// GET a specific application by ID
+app.get("/applications/:id", async (req, res) => {
     const applicationId = req.params.id;
   
     try {
@@ -162,39 +157,10 @@ app.get("/applications", async (req, res) => {
         console.error(error.message);
         res.status(500).json({ message: 'Internal Server Error' });
     }
-  });
+});
   
-  
-  // GET all applications with status filtering
-  app.get("/applications", async (req, res) => {
-    const { status } = req.query; // Retrieves the status 
-    try {
-        let query = "SELECT * FROM applications";
-        const params = [];
-  
-        // Check if a status filter is provided
-        if (status) {
-            query += " WHERE status = $1"; 
-            params.push(status);
-        }
-  
-        const result = await pool.query(query, params);
-  
-        // Check if any applications were found
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'No applications found' });
-        }
-  
-        // Respond with the applications found
-        res.status(200).json({ message: 'Applications retrieved successfully', response: result.rows });
-  
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
-  });
-  // POST a new application
-  app.post("/applications", async (req, res) => {
+// POST a new application
+app.post("/applications", async (req, res) => {
     const { pet_id, full_name, email, phone, address, preferred_pet_type, age_preference, gender_preference, previous_pet_ownership } = req.body;
   
     // Check if any required fields are missing
@@ -209,9 +175,9 @@ app.get("/applications", async (req, res) => {
             [pet_id, full_name, email, phone, address]
         );
   
-        // If application exists, respond with 404 status
+        // If application exists, respond with 409 status
         if (existingApplication.rows.length > 0) {
-            return res.status(404).json({ message: 'Application already exists' });
+            return res.status(409).json({ message: 'Application already exists' });
         }
   
         // Insert the new application into the database
@@ -221,19 +187,19 @@ app.get("/applications", async (req, res) => {
             [pet_id, full_name, email, phone, address, preferred_pet_type, age_preference, gender_preference, previous_pet_ownership]
         );
   
-        // Respond with the created application and a 200 status
-        res.status(200).json({ message: 'Application created successfully', response: result.rows[0] });
+        // Respond with the created application and a 201 status
+        res.status(201).json({ message: 'Application created successfully', response: result.rows[0] });
   
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: 'Internal Server Error' });
     }
-  });
+});
   
-  // PUT (update) an application by ID
-  app.put("/applications/:id", async (req, res) => {
+// PUT (update) an application by ID
+app.put("/applications/:id", async (req, res) => {
     const applicationId = req.params.id;
-    const { status } = req.body; //updating the status
+    const { status } = req.body; // Updating the status
   
     try {
         const result = await pool.query(
@@ -251,10 +217,10 @@ app.get("/applications", async (req, res) => {
         console.error(error.message);
         res.status(500).json({ message: 'Internal Server Error' });
     }
-  });
+});
   
-  // DELETE an application by ID
-  app.delete("/applications/:id", async (req, res) => {
+// DELETE an application by ID
+app.delete("/applications/:id", async (req, res) => {
     const applicationId = req.params.id;
   
     try {
@@ -264,18 +230,15 @@ app.get("/applications", async (req, res) => {
             return res.status(404).json({ message: 'Application not found' });
         }
   
-        res.status(200).json({ message: 'Application deleted successfully', response: result.rows[0] });
+        res.status(204).json(); // No content to return
   
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: 'Internal Server Error' });
     }
-  });
-  
+});
 
-// CRUD Operations for Pets
-
-// Events
+// CRUD Operations for Events
 
 // GET all events
 app.get("/events", async (req, res) => {
@@ -329,9 +292,9 @@ app.post("/events", async (req, res) => {
             [event_name, event_date]
         );
 
-        // If event exists, respond with 404 status
+        // If event exists, respond with 409 status
         if (existingEvent.rows.length > 0) {
-            return res.status(404).json({ message: 'Event already exists' });
+            return res.status(409).json({ message: 'Event already exists' });
         }
 
         // Insert the new event into the database
@@ -341,8 +304,8 @@ app.post("/events", async (req, res) => {
             [event_name, event_date, location, description]
         );
 
-        // Respond with the created event and a 200 status
-        res.status(200).json({ message: 'Event created successfully', response: result.rows[0] });
+        // Respond with the created event and a 201 status
+        res.status(201).json({ message: 'Event created successfully', response: result.rows[0] });
 
     } catch (error) {
         console.error(error.message);
@@ -361,7 +324,7 @@ app.delete("/events/:id", async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        res.status(200).json({ message: 'Event deleted successfully', response: result.rows[0] });
+        res.status(204).json(); // No content to return
 
     } catch (error) {
         console.error(error.message);
@@ -372,6 +335,5 @@ app.delete("/events/:id", async (req, res) => {
 // Start the server
 const PORT = 3000;
 app.listen(PORT, () => {
-console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
-
