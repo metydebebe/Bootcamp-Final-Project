@@ -313,6 +313,37 @@ app.post("/events", async (req, res) => {
     }
 });
 
+// PUT/update an event by ID
+app.put("/events/:id", async (req, res) => {
+    const eventId = req.params.id;
+    const { event_name, event_date, location, description } = req.body;
+
+    // Check if any required fields are missing
+    if (!event_name || !event_date || !location) {
+        return res.status(400).json({ message: 'Missing required fields: event_name, event_date, and location are required.' });
+    }
+
+    try {
+        // Update the event in the database
+        const result = await pool.query(
+            `UPDATE events 
+             SET event_name = $1, event_date = $2, location = $3, description = $4 
+             WHERE event_id = $5 RETURNING *`,
+            [event_name, event_date, location, description, eventId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        res.status(200).json({ message: 'Event updated successfully', response: result.rows[0] });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // DELETE an event by ID
 app.delete("/events/:id", async (req, res) => {
     const eventId = req.params.id;
