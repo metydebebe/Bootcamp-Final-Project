@@ -1,6 +1,8 @@
 import React from 'react';
-import Home from './Components/HomePage/Home';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import Home from './Components/HomePage/Home';
+import ContactUs from './Components/ContactUsPage/ContactBody';
 
 const App = () => {
   return (
@@ -8,6 +10,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} /> 
         <Route path="/home" element={<Home />} />
+        <Route path="/contact" element={<ContactUs />} /> 
+
         {/* add other routes*/}
  
       </Routes>

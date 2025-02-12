@@ -1,47 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
 import axios from 'axios';
+
+import Header from './Header';
+import Navigation from './Navigation';
+import Footer from './Footer';
 
 import img1 from '../../assets/img1.png'; 
 import img2 from '../../assets/img2.png'; 
 
-
-
-// Header Component
-const Header = () => {
-  return (
-    <header className="bg-warning-subtle  text-center py-4 rounded-4">
-      <h2 className="text-dark">Welcome! Find Your New Pet Today!</h2>
-    </header>
-  );
-};
-
-// Navigation Component
-const Navigation = () => {
-  return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-warning rounded-4">
-      <div className="container">
-        <ul className="navbar-nav mx-auto">
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/home">Home</NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/petProfiles">Pet Profiles</NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/events">Events</NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/contact">Contact Us</NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/apply">Apply Now</NavLink>
-          </li>
-        </ul>
-      </div>
-    </nav>
-  );
-};
 
 // HomeBody Component
 const HomeBody = () => {
@@ -132,23 +98,6 @@ const HomeBody = () => {
 
       </div>
     </div>
-  );
-};
-
-// Footer Component
-const Footer = () => {
-  return (
-    <footer className="bg-warning-subtle text-center py-4">
-      <p className='fs-5 custom-animation p-2'><b>Contact Us</b></p>
-      <div>
-        <p>Email: ethiopets@gmail.com</p>
-        <p>Tel: +251 977 76 7879</p>
-        <p><b>Address</b> 123 Pets Ave Addis Ababa, Ethiopia Postal Code: 1212</p>
-      </div>
-      <div>
-        <p>© 2023 Ethio-Pets Shelter. All rights reserved.</p>
-      </div>
-    </footer>
   );
 };
 
